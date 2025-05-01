@@ -9,7 +9,7 @@
   <h2>Consulta a un Sabio</h2>
   <form action="https://script.google.com/macros/s/AKfycbyGS-uQR4qn_LjAXghsTBirHton-35HA4AK7GdKm-MEumcZmWE4L7vJ0M1EaHzEkghY/exec" method="POST" target="hidden_iframe" onsubmit="return validarFormulario();">
     <label>Nombre:<br><input type="text" name="Nombre" required></label><br><br>
-    <label>Teléfono (10 dígitos):<br><input type="tel" name="Telefono" pattern="\d{10}" required></label><br><br>
+    <label>Teléfono (10 dígitos):<br><input type="tel" name="Telefono" pattern="\\d{10}" required></label><br><br>
     <label>Email:<br><input type="email" name="Email" required></label><br><br>
     <label>Pregunta (máx. 50 palabras):<br><textarea name="Pregunta" id="pregunta" required></textarea></label><br>
     <div id="contador">0/50 palabras</div><br>
@@ -37,7 +37,7 @@
       const respuesta = parseInt(document.getElementById("respuesta").value.trim(), 10);
       const check = document.getElementById("checkRobot").checked;
       const pregunta = document.getElementById("pregunta").value.trim();
-      const palabras = pregunta.split(/\s+/).filter(p => p.length > 0);
+      const palabras = pregunta.split(/\\s+/).filter(p => p.length > 0);
       if (isNaN(respuesta) || respuesta !== suma) {
         mensaje.textContent = "❌ Captcha incorrecto.";
         mensaje.style.color = "red";
@@ -59,7 +59,7 @@
     }
 
     document.getElementById("pregunta").addEventListener("input", function () {
-      const palabras = this.value.trim().split(/\s+/).filter(p => p.length > 0);
+      const palabras = this.value.trim().split(/\\s+/).filter(p => p.length > 0);
       document.getElementById("contador").textContent = `${palabras.length}/50 palabras`;
     });
 
