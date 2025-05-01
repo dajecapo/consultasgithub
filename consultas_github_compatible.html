@@ -1,0 +1,70 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Galería de Sabios - Consulta</title>
+</head>
+<body>
+  <h2>Consulta a un Sabio</h2>
+  <form action="https://script.google.com/macros/s/AKfycbyGS-uQR4qn_LjAXghsTBirHton-35HA4AK7GdKm-MEumcZmWE4L7vJ0M1EaHzEkghY/exec" method="POST" target="hidden_iframe" onsubmit="return validarFormulario();">
+    <label>Nombre:<br><input type="text" name="Nombre" required></label><br><br>
+    <label>Teléfono (10 dígitos):<br><input type="tel" name="Telefono" pattern="\d{10}" required></label><br><br>
+    <label>Email:<br><input type="email" name="Email" required></label><br><br>
+    <label>Pregunta (máx. 50 palabras):<br><textarea name="Pregunta" id="pregunta" required></textarea></label><br>
+    <div id="contador">0/50 palabras</div><br>
+    <label>Fecha:<br><input type="date" name="Fecha" required></label><br><br>
+    <label>Captcha: ¿Cuánto es <span id="captcha"></span>?<br>
+    <input type="text" id="respuesta" required></label><br><br>
+    <label><input type="checkbox" id="checkRobot" required> No soy un robot</label><br><br>
+    <button type="submit">Enviar</button>
+  </form>
+  <p id="mensaje"></p>
+  <iframe name="hidden_iframe" style="display:none;"></iframe>
+
+  <script>
+    let suma = 0;
+
+    function generarCaptcha() {
+      const a = Math.floor(Math.random() * 9) + 1;
+      const b = Math.floor(Math.random() * 9) + 1;
+      suma = a + b;
+      document.getElementById("captcha").innerText = `${a} + ${b}`;
+    }
+
+    function validarFormulario() {
+      const mensaje = document.getElementById("mensaje");
+      const respuesta = parseInt(document.getElementById("respuesta").value.trim(), 10);
+      const check = document.getElementById("checkRobot").checked;
+      const pregunta = document.getElementById("pregunta").value.trim();
+      const palabras = pregunta.split(/\s+/).filter(p => p.length > 0);
+      if (isNaN(respuesta) || respuesta !== suma) {
+        mensaje.textContent = "❌ Captcha incorrecto.";
+        mensaje.style.color = "red";
+        return false;
+      }
+      if (!check) {
+        mensaje.textContent = "❌ Confirma que no eres un robot.";
+        mensaje.style.color = "red";
+        return false;
+      }
+      if (palabras.length > 50) {
+        mensaje.textContent = "❌ La pregunta excede las 50 palabras.";
+        mensaje.style.color = "red";
+        return false;
+      }
+      mensaje.textContent = "✅ Enviando...";
+      mensaje.style.color = "green";
+      return true;
+    }
+
+    document.getElementById("pregunta").addEventListener("input", function () {
+      const palabras = this.value.trim().split(/\s+/).filter(p => p.length > 0);
+      document.getElementById("contador").textContent = `${palabras.length}/50 palabras`;
+    });
+
+    document.addEventListener("DOMContentLoaded", generarCaptcha);
+  </script>
+</body>
+</html>
