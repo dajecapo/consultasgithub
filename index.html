@@ -1,69 +1,172 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Galería de Sabios - Consulta</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Galería de Sabios</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f9f9f9;
+    }
+    .section {
+      padding: 2em;
+    }
+    .card {
+      background-color: white;
+      padding: 1.5em;
+      border-radius: 15px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+      text-align: center;
+      max-width: 400px;
+      margin: 0 auto 2em auto;
+    }
+    input, textarea {
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 1em;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #2a9d8f;
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1em;
+    }
+    button:hover {
+      background-color: #21867a;
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
 </head>
 <body>
-  <h2>Consulta a un Sabio</h2>
-  <form action="https://script.google.com/macros/s/AKfycbyGS-uQR4qn_LjAXghsTBirHton-35HA4AK7GdKm-MEumcZmWE4L7vJ0M1EaHzEkghY/exec" method="POST" target="hidden_iframe" onsubmit="return validarFormulario();">
-    <label>Nombre:<br><input type="text" name="Nombre" required></label><br><br>
-    <label>Teléfono (10 dígitos):<br><input type="tel" name="Telefono" pattern="\\d{10}" required></label><br><br>
-    <label>Email:<br><input type="email" name="Email" required></label><br><br>
-    <label>Pregunta (máx. 50 palabras):<br><textarea name="Pregunta" id="pregunta" required></textarea></label><br>
-    <div id="contador">0/50 palabras</div><br>
-    <label>Fecha:<br><input type="date" name="Fecha" required></label><br><br>
-    <label>Captcha: ¿Cuánto es <span id="captcha"></span>?<br>
-    <input type="text" id="respuesta" required></label><br><br>
-    <label><input type="checkbox" id="checkRobot" required> No soy un robot</label><br><br>
-    <button type="submit">Enviar</button>
-  </form>
-  <p id="mensaje"></p>
-  <iframe name="hidden_iframe" style="display:none;"></iframe>
+  <section class="section">
+    <a href="index.html" style="background-color: #2a9d8f; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold;">🏠 Inicio</a>
+
+    <h2 style="text-align: center; font-size: 2em; color: #264653;">Galería de Sabios</h2>
+
+    <div class="card">
+      <p style="font-size: 1.4em; font-weight: bold; color: #2a9d8f;">Daniel Jesús Carrillo Polanco</p>
+      <p style="font-size: 1.1em; color: #555;">61 años de edad</p>
+      <p style="font-size: 1.1em; color: #555;">Experto en Gestión de crisis</p>
+      <button onclick="document.getElementById('consultaDaniel').classList.toggle('hidden')">¡Haz tu consulta aquí!</button>
+    </div>
+
+    <div id="contadorConsultas" style="text-align: center; color: #264653; margin-bottom: 1em;">
+      Preguntas realizadas: <strong id="contadorNumero">0</strong>
+    </div>
+
+    <div id="consultaDaniel" class="hidden" style="margin-top: 2em;">
+      <form id="consultaForm" method="POST" action="https://script.google.com/macros/s/AKfycbyGS-uQR4qn_LjAXghsTBirHton-35HA4AK7GdKm-MEumcZmWE4L7vJ0M1EaHzEkghY/exec" target="hidden_iframe" onsubmit="return enviarFormulario();" style="max-width: 400px; margin: 0 auto; display: flex; flex-direction: column; gap: 1em;">
+        <input type="text" id="nombreConsulta" name="Nombre" placeholder="Tu nombre" required>
+        <input type="tel" id="telefonoConsulta" name="Telefono" placeholder="Teléfono (10 dígitos)" pattern="\d{10}" required>
+        <input type="email" id="emailConsulta" name="Email" placeholder="Correo electrónico" required>
+        <textarea id="preguntaConsulta" name="Pregunta" placeholder="Escribe tu pregunta (máx. 50 palabras)" required></textarea>
+        <div id="contadorPalabras" style="font-size: 0.9em; color: #777;">0/50 palabras</div>
+        <input type="date" id="fechaConsulta" name="Fecha" required>
+        <label id="captcha-label-consulta"></label>
+        <input type="text" id="captchaConsulta" placeholder="Resultado" required>
+        <label><input type="checkbox" id="checkRobot" required> Confirmo que no soy un robot</label>
+        <button type="submit">Enviar</button>
+      </form>
+      <p id="respuestaConsulta" style="text-align: center; font-style: italic; margin-top: 1em;"></p>
+    </div>
+  </section>
+
+  <iframe name="hidden_iframe" style="display: none;"></iframe>
 
   <script>
-    let suma = 0;
+    let captchaSumaConsulta = 0;
+    let contadorConsultas = 0;
 
-    function generarCaptcha() {
+    function generarCaptchaConsulta() {
       const a = Math.floor(Math.random() * 9) + 1;
       const b = Math.floor(Math.random() * 9) + 1;
-      suma = a + b;
-      document.getElementById("captcha").innerText = `${a} + ${b}`;
+      captchaSumaConsulta = a + b;
+      document.getElementById("captcha-label-consulta").textContent = `No soy robot: ¿Cuánto es ${a} + ${b}?`;
     }
 
-    function validarFormulario() {
-      const mensaje = document.getElementById("mensaje");
-      const respuesta = parseInt(document.getElementById("respuesta").value.trim(), 10);
+    function enviarFormulario() {
+      const telefono = document.getElementById("telefonoConsulta").value.trim();
+      const email = document.getElementById("emailConsulta").value.trim();
+      const pregunta = document.getElementById("preguntaConsulta").value.trim();
+      const fecha = document.getElementById("fechaConsulta").value;
+      const captcha = parseInt(document.getElementById("captchaConsulta").value.trim(), 10);
       const check = document.getElementById("checkRobot").checked;
-      const pregunta = document.getElementById("pregunta").value.trim();
-      const palabras = pregunta.split(/\\s+/).filter(p => p.length > 0);
-      if (isNaN(respuesta) || respuesta !== suma) {
-        mensaje.textContent = "❌ Captcha incorrecto.";
-        mensaje.style.color = "red";
+      const palabras = pregunta.split(/\s+/).filter(p => p.length > 0);
+      const respuesta = document.getElementById("respuestaConsulta");
+
+      if (!/^\d{10}$/.test(telefono)) {
+        respuesta.textContent = "❌ El teléfono debe tener 10 dígitos.";
+        respuesta.style.color = "red";
         return false;
       }
-      if (!check) {
-        mensaje.textContent = "❌ Confirma que no eres un robot.";
-        mensaje.style.color = "red";
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        respuesta.textContent = "❌ Ingresa un correo electrónico válido.";
+        respuesta.style.color = "red";
         return false;
       }
+
       if (palabras.length > 50) {
-        mensaje.textContent = "❌ La pregunta excede las 50 palabras.";
-        mensaje.style.color = "red";
+        respuesta.textContent = "❌ Máximo 50 palabras.";
+        respuesta.style.color = "red";
         return false;
       }
-      mensaje.textContent = "✅ Enviando...";
-      mensaje.style.color = "green";
-      return true;
+
+      if (isNaN(captcha) || captcha !== captchaSumaConsulta) {
+        respuesta.textContent = "❌ Respuesta incorrecta en el captcha.";
+        respuesta.style.color = "red";
+        return false;
+      }
+
+      if (!check) {
+        respuesta.textContent = "❌ Debes confirmar que no eres un robot.";
+        respuesta.style.color = "red";
+        return false;
+      }
+
+      if (!fecha) {
+        respuesta.textContent = "❌ Debes seleccionar una fecha.";
+        respuesta.style.color = "red";
+        return false;
+      }
+
+      respuesta.textContent = "✅ Tu consulta fue enviada con éxito.";
+      respuesta.style.color = "green";
+      contadorConsultas++;
+      document.getElementById("contadorNumero").textContent = contadorConsultas;
+
+      setTimeout(() => {
+        respuesta.textContent = "";
+        document.getElementById("consultaForm").reset();
+        document.getElementById("contadorPalabras").textContent = "0/50 palabras";
+        generarCaptchaConsulta();
+      }, 5000);
+
+      document.getElementById("consultaForm").submit();
+      return false;
     }
 
-    document.getElementById("pregunta").addEventListener("input", function () {
-      const palabras = this.value.trim().split(/\\s+/).filter(p => p.length > 0);
-      document.getElementById("contador").textContent = `${palabras.length}/50 palabras`;
+    document.addEventListener("DOMContentLoaded", function () {
+      generarCaptchaConsulta();
+      document.getElementById("preguntaConsulta").addEventListener("input", function () {
+        const palabras = this.value.trim().split(/\s+/).filter(p => p.length > 0);
+        const contador = document.getElementById("contadorPalabras");
+        contador.textContent = `${palabras.length}/50 palabras`;
+        contador.style.color = palabras.length > 50 ? "red" : "#777";
+      });
     });
-
-    document.addEventListener("DOMContentLoaded", generarCaptcha);
   </script>
 </body>
 </html>
